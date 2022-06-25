@@ -43,7 +43,7 @@ namespace Repositorio
         {
             ContatoModel contatoDB = ListarPorID(contato.Id);
 
-            if (contatoDB == null) throw new System.Exception("Houve um erro na atualização do contato!");
+            if (contatoDB == null) return null;
 
             contatoDB.Nome = contato.Nome;
             contatoDB.Email = contato.Email;

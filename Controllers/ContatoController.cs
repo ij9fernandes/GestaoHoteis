@@ -7,10 +7,10 @@ namespace GestaoHoteis.Controllers
 {
     public class ContatoController : Controller
     {
-        // Declaração de variavel
+       
         private readonly IContatoRepositorio _contatoRepositorio;
 
-        // Observação quando ao nome do construtor: Contato ou ContatoRepositorio
+        
         public ContatoController(IContatoRepositorio contatoRepositorio)
         {
             _contatoRepositorio = contatoRepositorio;
@@ -28,7 +28,6 @@ namespace GestaoHoteis.Controllers
             return View();
         }
 
-        // Retorna para dentro da View, o cadastro baseado no Id do banco de dados
         public IActionResult Editar(int id)
         {
             ContatoModel contato = _contatoRepositorio.ListarPorID(id);
@@ -43,23 +42,71 @@ namespace GestaoHoteis.Controllers
 
         public IActionResult Apagar(int id)
         {
-            _contatoRepositorio.Apagar(id);
-            return RedirectToAction("Index");
+            try
+            {
+                bool apagado = _contatoRepositorio.Apagar(id);
+                
+                if (apagado)
+                {
+                    TempData["MensagemSucesso"] = "Contato apagado com sucesso!";
+                }
+                else
+                {
+                    TempData["MensagemErro"] = "Ops, não foi possível excluir o contato!";
+                }
+
+                return RedirectToAction("Index");
+            }
+            catch (System.Exception erro)
+            {
+                TempData["MensagemErro"] = $"Ops, não foi possível cadastrar seu contato, tente novamente, detalhes do erro: {erro.Message}";
+                return RedirectToAction("Index");
+            }
+            
         }
 
-        // Criação do método Post, para receber e cadastrar informações
         [HttpPost]
         public IActionResult Criar(ContatoModel contato)
         {
-            _contatoRepositorio.Adicionar(contato);
-            return RedirectToAction("Index");
+            try
+            {
+                if(ModelState.IsValid)
+                {
+                    _contatoRepositorio.Adicionar(contato);
+                    TempData["MensagemSucesso"] = "Contato Cadastrado com Sucesso!";
+                    return RedirectToAction("Index");
+                }
+                
+                return View(contato);
+            }
+            catch (System.Exception erro)
+            {
+                TempData["MensagemErro"] = $"Ops, não foi possível realizar o cadastro, tente novamente, detalhe do erro: {erro.Message}";
+                return RedirectToAction("Index");
+
+            }
         }
-        // Criação do método Post, para receber e cadastrar informações
+        
         [HttpPost]
         public IActionResult Alterar(ContatoModel contato)
         {
-            _contatoRepositorio.Atualizar(contato);
-            return RedirectToAction("Index");
+           try
+           {
+                if (ModelState.IsValid)
+                {
+                    _contatoRepositorio.Atualizar(contato);
+                    TempData["MensagemSucesso"] = "Contato alterado com sucesso!";
+                    return RedirectToAction("Index");
+                }
+            
+                return View("Editar", contato);
+           }
+           catch (System.Exception erro)
+           {
+            
+                TempData["MensagemErro"] = $"Ops, não foi possível atualizar seu contato, tente novamente, detalhes do erro: {erro.Message}";
+                return RedirectToAction("Index");
+           } 
         }
     }
 }
